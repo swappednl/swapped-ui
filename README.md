@@ -10,14 +10,41 @@ De Swapped-designtaal als pakket: één bron voor het beeld van swapped-projects
 
 ## Aansluiten
 
-Composer (lokaal via een path-repository met symlink, later via de GitHub-org `swappednl`):
+Composer haalt het pakket uit de privé-repo `swappednl/swapped-ui`, zodat ook
+servers en CI erbij kunnen (een path-repository naar `../swapped-ui` bestaat
+alleen op een ontwikkelmachine en breekt elke deploy):
 
 ```json
-"repositories": [{ "type": "path", "url": "../swapped-ui", "options": { "symlink": true } }],
+"repositories": [{ "type": "vcs", "url": "https://github.com/swappednl/swapped-ui.git" }],
 "require": { "swapped/ui": "@dev" }
 ```
 
-npm: `npm install ../swapped-ui` (symlink). In `resources/css/app.css`:
+Omdat de repo privé is, heeft elke machine die `composer install` draait een
+GitHub-token nodig met leesrecht op deze repo:
+
+- werkplek: `composer config --global --auth github-oauth.github.com <token>`
+- webserver: hetzelfde commando als de deploy-gebruiker (schrijft
+  `~/.composer/auth.json`)
+- GitHub Actions: repo-secret `SWAPPED_UI_TOKEN`, gelezen via `COMPOSER_AUTH`
+  op de `composer install`-stap
+
+## Wijziging uitrollen
+
+1. Wijzig hier, `CHANGELOG.md` bij, commit en `git push`.
+2. In elke app: `composer update swapped/ui` — dat zet de nieuwe commit in
+   `composer.lock`; committen en deployen.
+
+Tijdens het schuiven aan een recept is het handig om de vendor-kopie even te
+vervangen door een symlink naar deze map; `composer update swapped/ui` zet hem
+daarna weer terug:
+
+```bash
+rm -rf vendor/swapped/ui && ln -s ../../../swapped-ui vendor/swapped/ui
+```
+
+npm: `npm install ../swapped-ui` (symlink) — dit is nog wél een lokaal pad, dus
+een server die zelf `npm ci && npm run build` draait heeft deze map nodig.
+In `resources/css/app.css`:
 
 ```css
 @import 'tailwindcss';
