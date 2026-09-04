@@ -1,0 +1,25 @@
+{
+    "name": "swapped/ui",
+    "description": "Swapped-designtaal: tokens, recepten, iconen en Alpine-modules voor swapped-projects, isms, boekhouding en netwerk.",
+    "type": "library",
+    "license": "proprietary",
+    "require": {
+        "php": "^8.3",
+        "illuminate/support": "^12.0|^13.0",
+        "illuminate/view": "^12.0|^13.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Swapped\\Ui\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Swapped\\Ui\\UiServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}

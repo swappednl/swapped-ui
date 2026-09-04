@@ -1,0 +1,708 @@
+/*
+|--------------------------------------------------------------------------
+| swapped-ui — de Swapped-designtaal
+|--------------------------------------------------------------------------
+| Eén bron voor swapped-projects, isms, boekhouding en netwerk. Importeer ná
+| Tailwind:
+|
+|     @import 'tailwindcss';
+|     @import '@swapped/ui/css';
+|
+| Alles staat in @layer base / @layer components, zodat een Tailwind-utility
+| in de markup er altijd overheen gaat (`card p-6` doet wat je verwacht).
+| Primair is indigo via de `primary-*`-tokens in @theme; een app met
+| tenant-theming overschrijft die tokens in een eigen @theme-blok.
+*/
+@theme {
+    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
+
+    /* Primair = indigo. De recepten hieronder schrijven `primary-*`, zodat een
+       app met tenant-theming (netwerk) alleen deze tokens hoeft te
+       overschrijven; swapped-projects, isms en boekhouding zetten niets. */
+    --color-primary-50: var(--color-primary-50);
+    --color-primary-100: var(--color-primary-100);
+    --color-primary-300: var(--color-primary-300);
+    --color-primary-400: var(--color-primary-400);
+    --color-primary-500: var(--color-primary-500);
+    --color-primary-600: var(--color-primary);
+    --color-primary-700: var(--color-primary-700);
+    --color-primary: var(--color-primary);
+    --color-primary-contrast: #ffffff;
+}
+
+@layer base {
+    body {
+        @apply bg-slate-50 text-slate-800 antialiased;
+    }
+
+    /* Houdt Alpine-panelen dicht tot Alpine ze overneemt. Zonder deze regel
+       staan alle keuzelijsten open in de eerste beeldopbouw. */
+    [x-cloak] {
+        display: none !important;
+    }
+
+    /* Bedragen op vaste cijferbreedte: kolommen blijven uitgelijnd. */
+    .tabular {
+        font-variant-numeric: tabular-nums;
+    }
+}
+
+@layer components {
+    .card {
+        @apply bg-white border border-slate-200/80 rounded-2xl shadow-sm shadow-slate-200/40;
+    }
+
+    .btn-primary {
+        @apply inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition
+               bg-primary text-primary-contrast hover:bg-primary-700 shadow-sm shadow-primary/20
+               disabled:cursor-not-allowed disabled:opacity-50;
+    }
+
+    .btn-ghost {
+        @apply inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition
+               border border-slate-200 bg-white text-slate-700 hover:bg-slate-50
+               disabled:cursor-not-allowed disabled:opacity-60;
+    }
+
+    .input {
+        @apply w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800
+               placeholder:text-slate-400 focus:border-primary-400 focus:ring-2 focus:ring-primary-100 focus:outline-none;
+    }
+
+    /* ---- Keuzelijst (x-select) ------------------------------------------
+       Zelfde maatvoering als .input, maar het paneel tekenen we zelf: de lijst
+       van een native <select> komt van het besturingssysteem en is niet te
+       stylen — geen zoekveld, geen eigen kleuren. */
+    .dropdown-trigger {
+        @apply flex w-full items-center justify-between gap-2 rounded-xl border border-slate-200 bg-white
+               py-2 pl-3 pr-2.5 text-left text-sm text-slate-800 transition
+               hover:border-slate-300 focus:outline-none disabled:cursor-not-allowed
+               disabled:border-slate-200 disabled:bg-slate-50 disabled:text-slate-400;
+    }
+
+    .dropdown-trigger-open {
+        @apply border-primary-500 ring-2 ring-primary-100 hover:border-primary-500;
+    }
+
+    .dropdown-trigger:focus-visible {
+        @apply border-primary-400 ring-2 ring-primary-100;
+    }
+
+    .dropdown-trigger-sm {
+        @apply py-1.5 pl-2.5 pr-2 text-sm;
+    }
+
+    .dropdown-trigger-subtle {
+        @apply border-transparent bg-slate-50 text-slate-500 hover:border-slate-200 hover:bg-white;
+    }
+
+    .dropdown-caret {
+        @apply h-4 w-4 shrink-0 text-slate-400 transition duration-150;
+    }
+
+    .dropdown-trigger:disabled .dropdown-caret {
+        @apply text-slate-300;
+    }
+
+    /* Staat `fixed` — zie dropdown.js: in een tabel met overflow zou een
+       absoluut paneel worden afgeknipt. */
+    .dropdown-panel {
+        @apply z-50 flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white
+               shadow-xl shadow-slate-900/10;
+    }
+
+    .dropdown-search-wrap {
+        @apply relative shrink-0 border-b border-slate-100 p-2;
+    }
+
+    .dropdown-search-icon {
+        @apply pointer-events-none absolute left-5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400;
+    }
+
+    .dropdown-search {
+        @apply w-full rounded-xl border border-slate-200 bg-white py-2 pl-9 pr-3 text-sm text-slate-800
+               placeholder:text-slate-400 focus:border-primary-400 focus:ring-2 focus:ring-primary-100 focus:outline-none;
+    }
+
+    .dropdown-list {
+        @apply min-h-0 flex-1 overflow-y-auto p-1.5;
+    }
+
+    .dropdown-option {
+        @apply flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2 text-left text-sm
+               text-slate-700 transition;
+    }
+
+    /* Toetsenbord en muis wijzen hetzelfde aan: één regel licht op. */
+    .dropdown-option-active {
+        @apply bg-slate-100 text-slate-900;
+    }
+
+    .dropdown-option-selected {
+        @apply bg-primary-50 font-medium text-primary-700;
+    }
+
+    .dropdown-option-selected.dropdown-option-active {
+        @apply bg-primary-100 text-primary-700;
+    }
+
+    .dropdown-hint {
+        @apply shrink-0 text-xs text-slate-400;
+    }
+
+    .dropdown-empty {
+        @apply px-3 py-6 text-center text-sm text-slate-400;
+    }
+
+    /* Toevoegen-regel onderin: los van de lijst, want het is geen keuze maar
+       een actie. Blijft staan als de lijst scrollt. */
+    .dropdown-foot {
+        @apply shrink-0 border-t border-slate-100 p-1.5;
+    }
+
+    .dropdown-create {
+        @apply flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-medium
+               text-primary transition hover:bg-primary-50 disabled:opacity-60;
+    }
+
+    .dropdown-create-error {
+        @apply px-3 pb-1 pt-1.5 text-xs text-rose-600;
+    }
+
+    /* ---- Uitschuifmenu (onder lg) ---------------------------------------
+       Schuift met transform in plaats van display: dan valt er niets te
+       vechten met x-show. De stand zelf staat inline op het element — twee
+       klassen die allebei `translate` zetten winnen om beurten, afhankelijk
+       van de volgorde in het gebouwde bestand. */
+    .drawer-overlay {
+        @apply fixed inset-0 z-40 bg-slate-900/40 transition duration-200;
+    }
+
+    /* ---- Iconenrail ------------------------------------------------------
+       Swapped-huisstijl voor elke sidebar: verloop van donker marineblauw
+       bovenin naar teal onderin (zelfde basis als in Bizzie). */
+    .rail {
+        background: linear-gradient(180deg, #0b1e3c 0%, #10375c 45%, #1ba3b3 100%);
+    }
+
+    /* Hoverlabel rechts naast een railicoon: vervangt het title-attribuut,
+       zodat de naam direct en in huisstijl verschijnt. */
+    .rail-tip {
+        @apply pointer-events-none absolute left-full z-50 ml-3 whitespace-nowrap rounded-lg
+               bg-slate-900/95 px-2.5 py-1.5 text-xs font-medium text-white shadow-lg shadow-slate-900/30;
+        top: 50%;
+        transform: translate(-4px, -50%);
+        opacity: 0;
+        transition: opacity 0.15s ease, transform 0.15s ease;
+    }
+
+    .group:hover > .rail-tip,
+    .group:focus-visible > .rail-tip {
+        opacity: 1;
+        transform: translate(0, -50%);
+        transition-delay: 0.1s;
+    }
+
+    /* Zelfde hoverlabel, maar ónder de knop: voor de actieknoppen in de
+       kop van een mailbericht, waar rechts geen ruimte is. */
+    .tip-below {
+        @apply pointer-events-none absolute left-1/2 top-full z-50 mt-2 whitespace-nowrap rounded-lg
+               bg-slate-900/95 px-2.5 py-1.5 text-xs font-medium text-white shadow-lg shadow-slate-900/30;
+        transform: translate(-50%, -4px);
+        opacity: 0;
+        transition: opacity 0.15s ease, transform 0.15s ease;
+    }
+
+    .group:hover > .tip-below,
+    .group:focus-within > .tip-below {
+        opacity: 1;
+        transform: translate(-50%, 0);
+        transition-delay: 0.1s;
+    }
+
+    /* Slepen van een gesprek naar een map. De klassen worden vanuit
+       resources/js/mail.js gezet, dus ze staan hier en niet in een blade. */
+    .mail-sleep-bezig {
+        @apply opacity-40;
+    }
+
+    .mail-drop-doel {
+        @apply bg-primary-50 ring-2 ring-inset ring-primary-400;
+    }
+
+    /* ---- Startpagina ------------------------------------------------------
+       De dagstart-hub staat lós van de app-vormgeving: donker huisstijl-
+       verloop over de hele pagina, met zachte lichtvlekken voor diepte. */
+    .start-bg {
+        background:
+            radial-gradient(55rem 38rem at 88% -12%, color-mix(in srgb, var(--color-primary-500) 32%, transparent), transparent 60%),
+            radial-gradient(48rem 34rem at -12% 112%, rgb(27 163 179 / 0.5), transparent 60%),
+            linear-gradient(165deg, #0b1e3c 0%, #10375c 55%, #147c8c 100%);
+    }
+
+    .glass {
+        @apply rounded-3xl border border-white/10 bg-white/[0.06] shadow-xl shadow-slate-950/30 backdrop-blur-xl;
+    }
+
+    /* Formuliervelden op de donkere startpagina (tegel-modal). */
+    .start-label {
+        @apply mb-1.5 block text-xs font-medium uppercase tracking-wide text-white/50;
+    }
+
+    .start-input {
+        @apply w-full rounded-xl border border-white/15 bg-white/10 px-3.5 py-2.5 text-sm text-white placeholder-white/30 outline-none transition
+               focus:border-teal-300/60 focus:bg-white/15;
+    }
+
+    /* Kaarten glijden bij het laden zachtjes omhoog; volgorde via --enter-delay. */
+    .start-enter {
+        animation: start-enter 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+        animation-delay: var(--enter-delay, 0s);
+    }
+
+    @keyframes start-enter {
+        from { opacity: 0; transform: translateY(14px); }
+        to { opacity: 1; transform: none; }
+    }
+
+    /* Laad-skelet voor de AI-briefing. */
+    .shimmer {
+        @apply relative overflow-hidden rounded-lg bg-white/10;
+    }
+
+    .shimmer::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        transform: translateX(-100%);
+        background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.14), transparent);
+        animation: shimmer 1.6s infinite;
+    }
+
+    @keyframes shimmer {
+        100% { transform: translateX(100%); }
+    }
+
+    /* Hetzelfde skelet, maar voor de lichte schermen in de app (de
+       gesprekkenlijst in Mail). Blokjes in de maat van de echte regels,
+       zodat er niets verspringt zodra de inhoud binnen is. */
+    .skelet {
+        @apply relative block overflow-hidden rounded bg-slate-100;
+    }
+
+    .skelet::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        transform: translateX(-100%);
+        background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.75), transparent);
+        animation: shimmer 1.6s infinite;
+    }
+
+    /* Wie liever geen bewegende beelden ziet, krijgt een rustig vlak. */
+    @media (prefers-reduced-motion: reduce) {
+        .shimmer::after,
+        .skelet::after { animation: none; }
+    }
+
+    .drawer {
+        @apply fixed inset-y-0 left-0 z-50 flex w-72 max-w-[85%] flex-col border-r border-slate-200
+               bg-white transition-transform duration-200 ease-out;
+    }
+
+    .label {
+        @apply block text-xs font-medium uppercase tracking-wide text-slate-500 mb-1.5;
+    }
+
+    .chip {
+        @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium;
+    }
+
+    .th {
+        @apply px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-slate-500;
+    }
+
+    .td {
+        @apply px-4 py-2.5 text-sm text-slate-700;
+    }
+
+    /* ---- Mail, agenda & chat --------------------------------------------- */
+
+    /* Rich-text editors (compose, handtekening, chat-composer). */
+    .editor-surface {
+        @apply min-h-32 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-800
+               focus:border-primary-400 focus:ring-2 focus:ring-primary-100 focus:outline-none;
+    }
+
+    .editor-surface:focus-visible {
+        outline: none;
+    }
+
+    .editor-surface blockquote {
+        @apply my-1 border-l-2 border-slate-300 pl-3 text-slate-600;
+    }
+
+    .editor-surface ul { @apply list-disc pl-5; }
+    .editor-surface ol { @apply list-decimal pl-5; }
+    .editor-surface a { @apply text-primary underline; }
+    .editor-surface pre { @apply my-1 rounded-lg bg-slate-100 px-3 py-2 font-mono text-[13px]; }
+    .editor-surface img { @apply my-1 max-w-full rounded-lg; }
+
+    .editor-empty:before {
+        content: attr(data-placeholder);
+        @apply pointer-events-none text-slate-400;
+    }
+
+    /* Chat-composers: placeholder zolang het veld echt leeg is. */
+    [contenteditable][data-placeholder]:empty:before {
+        content: attr(data-placeholder);
+        @apply pointer-events-none text-slate-400;
+    }
+
+    .editor-btn {
+        @apply grid h-8 w-8 place-items-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-slate-900;
+    }
+
+    /* Chips in ontvanger- en deelnemervelden. */
+    .chip-field {
+        @apply flex min-h-10 w-full flex-wrap items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-2 py-1.5
+               focus-within:border-primary-400 focus-within:ring-2 focus-within:ring-primary-100;
+    }
+
+    .chip-item {
+        @apply inline-flex max-w-full items-center gap-1 rounded-full bg-slate-100 py-1 pl-2.5 pr-1.5 text-xs font-medium text-slate-700;
+    }
+
+    /* Ster-knop in de maillijst. */
+    .star-btn { @apply text-slate-300 transition hover:text-amber-400; }
+    .star-btn.is-starred { @apply text-amber-400; }
+    .star-btn.is-starred svg { fill: currentColor; }
+
+    /* Berichtinhoud in de chat. */
+    .chat-body { @apply text-sm leading-relaxed text-slate-800 break-words; }
+    .chat-body a { @apply text-primary underline; }
+    .chat-body ul { @apply list-disc pl-5; }
+    .chat-body ol { @apply list-decimal pl-5; }
+    .chat-body pre { @apply my-1 overflow-x-auto rounded-lg bg-slate-900 px-3 py-2 font-mono text-[13px] text-slate-100; }
+    .chat-body code { @apply rounded bg-slate-100 px-1 py-0.5 font-mono text-[13px] text-rose-600; }
+    .chat-body pre code { @apply bg-transparent p-0 text-slate-100; }
+    .chat-body blockquote { @apply my-1 border-l-2 border-slate-300 pl-3 text-slate-600; }
+
+    .mention {
+        @apply rounded bg-primary-50 px-1 py-0.5 text-[13px] font-medium text-primary-700;
+    }
+
+    /* ---- Notities ---------------------------------------------------------
+       De tekst van een notitie, in de editor én alleen-lezen. De eerste regel
+       is de titel, zoals in Apple Notities; de checklist en de taakmarkering
+       zijn eigen constructies (zie App\Notes\NotitieHtml). */
+    .notitie-body { @apply text-[15px] leading-relaxed text-slate-800 break-words; }
+    .notitie-body > :is(p, div, h1, h2, h3):first-child { @apply mb-1 text-2xl font-semibold leading-tight text-slate-900; }
+    .notitie-body h1 { @apply mt-3 text-2xl font-semibold leading-tight text-slate-900; }
+    .notitie-body h2 { @apply mt-2 text-lg font-semibold text-slate-900; }
+    .notitie-body h3 { @apply mt-2 text-base font-semibold text-slate-900; }
+    .notitie-body ul { @apply list-disc pl-6; }
+    .notitie-body ol { @apply list-decimal pl-6; }
+    .notitie-body li { @apply my-0.5; }
+    .notitie-body blockquote { @apply my-1 border-l-2 border-amber-300 pl-3 text-slate-600; }
+    .notitie-body pre { @apply my-1 overflow-x-auto whitespace-pre-wrap rounded-lg bg-slate-100 px-3 py-2 font-mono text-[13px]; }
+    .notitie-body code { @apply rounded bg-slate-100 px-1 py-0.5 font-mono text-[13px]; }
+    .notitie-body a { @apply text-primary underline; }
+    .notitie-body hr { @apply my-3 border-slate-200; }
+
+    /* De checklist: het vinkje is een ::before, een klik in de linkerrand
+       schakelt hem om (klik() in resources/js/notities.js). */
+    .notitie-body ul[data-checklist] { @apply list-none pl-0; }
+    .notitie-body ul[data-checklist] > li { @apply relative pl-7; }
+    .notitie-body ul[data-checklist] > li::before {
+        content: '';
+        @apply absolute left-0 top-[0.3em] h-[1.15rem] w-[1.15rem] cursor-pointer rounded-full border-[1.5px] border-slate-300 bg-white transition;
+    }
+    .notitie-body ul[data-checklist] > li:hover::before { @apply border-amber-400; }
+    .notitie-body ul[data-checklist] > li[data-checked="true"]::before {
+        @apply border-amber-500 bg-amber-500;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E");
+        background-size: 65%;
+        background-position: center;
+        background-repeat: no-repeat;
+    }
+    .notitie-body ul[data-checklist] > li[data-checked="true"] { @apply text-slate-400 line-through; }
+
+    /* Tekst waarvan een taak is gemaakt. */
+    .notitie-body span[data-taak] {
+        @apply rounded bg-primary-50 px-1 text-primary-700 underline decoration-primary-300 decoration-dotted underline-offset-2;
+    }
+
+    .notitie-opmaak-optie { @apply block w-full px-3 py-1.5 text-left text-slate-800 transition hover:bg-slate-50; }
+
+    .notitie-menu-optie { @apply flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm text-slate-700 transition hover:bg-slate-50; }
+    .notitie-menu-optie svg { @apply h-4 w-4 shrink-0 text-slate-400; }
+
+    /* ---- Chatpaneel -------------------------------------------------------
+       Het paneel staat vast aan de rechterkant. Vanaf lg schuift de inhoud van
+       de pagina mee op, zodat er niets onder verdwijnt; daaronder is het een
+       overlay en hoeft er niets te wijken. De breedte komt uit de store en
+       staat als variabele op <html> — inline stijl kan geen breakpoint. */
+    @media (min-width: 1024px) {
+        body.chatpaneel-open .chat-verschuif {
+            padding-right: var(--chatpaneel-breedte, 380px);
+        }
+    }
+
+    /* De overgang alleen als de pagina staat: bij het laden is de stand al
+       gezet (het kopscript in layouts/app.blade.php) en mag er niets schuiven.
+       Zonder die voorwaarde zie je op elke pagina de inhoud opzij glijden,
+       omdat Alpine de klasse pas na de eerste tekening zet. */
+    body.chatpaneel-klaar .chat-verschuif {
+        transition: padding-right 0.15s ease;
+    }
+
+    /* ---- Gedeelde items in een bericht ------------------------------------
+       Een issue, ticket of klant die in de chat gedeeld wordt. Bewust een
+       kaartje en geen kale link: de sleutel en de status zijn precies wat je
+       wilt zien zonder erheen te klikken. Zie App\Chat\Deelbaar. */
+    /* Let op de selector: `.chat-body a` hierboven is specifieker dan een
+       kale `.chat-item` en zou het kaartje anders onderstrepen en zijn kader
+       afpakken. */
+    .chat-body a.chat-item,
+    a.chat-item {
+        @apply my-1 inline-flex max-w-full items-center gap-2 rounded-xl border border-slate-200 bg-white
+               px-2.5 py-1.5 align-middle text-[13px] font-normal text-slate-800 no-underline transition
+               hover:border-slate-300 hover:bg-slate-50;
+    }
+
+    .chat-item__sleutel {
+        @apply shrink-0 rounded-lg bg-slate-100 px-1.5 py-0.5 font-mono text-[11px] font-semibold text-slate-600;
+    }
+
+    .chat-item__titel { @apply min-w-0 truncate font-medium text-slate-800; }
+    .chat-item__meta { @apply hidden shrink-0 truncate text-xs text-slate-400 sm:block; }
+
+    /* Een kleurstreepje per soort, zodat je in een lange draad meteen ziet
+       waar iets over gaat. */
+    .chat-item--issue .chat-item__sleutel { @apply bg-primary-50 text-primary-700; }
+    .chat-item--order .chat-item__sleutel { @apply bg-amber-50 text-amber-700; }
+    .chat-item--support .chat-item__sleutel { @apply bg-teal-50 text-teal-700; }
+    .chat-item--klant .chat-item__sleutel { @apply bg-sky-50 text-sky-700; }
+
+    /* Het item bestaat niet meer: de tekst blijft, de link niet. */
+    .chat-item--weg {
+        @apply my-1 inline-flex items-center rounded-xl border border-dashed border-slate-200
+               px-2.5 py-1.5 align-middle text-[13px] text-slate-400;
+    }
+
+    /* De kiezer: zoeken naar wat je wilt delen. */
+    .deel-rij {
+        @apply flex w-full items-center gap-2.5 rounded-xl px-2.5 py-2 text-left text-sm transition;
+    }
+
+    .deel-rij--actief { @apply bg-primary-50 text-primary-700; }
+    .deel-rij:not(.deel-rij--actief) { @apply text-slate-700 hover:bg-slate-50; }
+
+    /* De berichten in het paneel staan dichter op elkaar dan in de module. */
+    .chat-body p { @apply m-0; }
+    .chat-body p + p { @apply mt-1.5; }
+
+    /* Agenda: tijdraster van 1px per minuut. */
+    .timegrid-hour {
+        @apply relative border-t border-slate-100;
+        height: 60px;
+    }
+
+    /* ---- Afspraakblok ----------------------------------------------------
+       Dichtgekleurd vlak in de kleur van de agenda, met tekst die daarop
+       leesbaar is (--kleur-tekst komt uit CalendarGrid::textOn). Een
+       doorzichtig vlak met alleen een streep links viel op de telefoon
+       weg tegen het raster. */
+    .agenda-blok {
+        background: var(--kleur, var(--color-primary-500));
+        color: var(--kleur-tekst, #fff);
+        box-shadow: 0 1px 2px rgb(15 23 42 / 0.14);
+        transition: filter 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .agenda-blok:hover {
+        filter: brightness(0.93);
+        box-shadow: 0 4px 12px rgb(15 23 42 / 0.22);
+    }
+
+    /* Begin- en eindtijd: dezelfde tekstkleur, maar een stap rustiger. */
+    .agenda-blok__tijd {
+        opacity: 0.78;
+    }
+
+    /* Afgezegd: omlijnd in plaats van dichtgekleurd — zoals Google Agenda,
+       zodat een afspraak waar je niet bent even goed te zien is. */
+    .agenda-blok--afgezegd {
+        background: color-mix(in srgb, var(--kleur) 14%, #fff);
+        color: var(--kleur-rand, var(--kleur));
+        box-shadow: inset 0 0 0 1.5px var(--kleur);
+    }
+
+    .agenda-blok--afgezegd:hover {
+        filter: none;
+        background: color-mix(in srgb, var(--kleur) 24%, #fff);
+    }
+
+    /* De tweede selector is voor de hele-dag-strook: daar is het blok zelf
+       ook de titel. */
+    .agenda-blok--afgezegd .agenda-blok__titel,
+    .agenda-blok--afgezegd.agenda-blok__titel {
+        text-decoration: line-through;
+    }
+
+    /* ---- Mobiel (< lg) ---------------------------------------------------
+       Onder lg valt de navigatie al weg; daar gedraagt de app zich als een
+       telefoon-app in plaats van een verkleind bureaublad. Alles hieronder
+       zit in een media query, zodat de weergave op grote schermen ongemoeid
+       blijft. */
+
+    /* Lijst tot de schermrand, zonder kaartrand — zoals Mail en Agenda op
+       iOS. De negatieve marge spiegelt de padding van <main>. */
+    @media (max-width: 1023px) {
+        .mobile-flush {
+            margin-left: -1rem;
+            margin-right: -1rem;
+            border-radius: 0;
+            border-left-width: 0;
+            border-right-width: 0;
+            box-shadow: none;
+        }
+    }
+
+    @media (min-width: 640px) and (max-width: 1023px) {
+        .mobile-flush {
+            margin-left: -1.5rem;
+            margin-right: -1.5rem;
+        }
+    }
+
+    /* Aanraakregel: minstens 44px hoog (Apple's richtlijn) en een korte
+       grijstint bij het indrukken in plaats van een hover die niet bestaat. */
+    @media (max-width: 1023px) {
+        .tap-row {
+            min-height: 44px;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .tap-row:active {
+            background-color: theme('colors.slate.100');
+        }
+    }
+
+    /* Tekst afkappen na 1 of 2 regels, uitsluitend op de telefoon. Als eigen
+       regel in een media query in plaats van lg:line-clamp-none, omdat twee
+       Tailwind-klassen die allebei `display` zetten om beurten winnen. */
+    @media (max-width: 1023px) {
+        .mobile-clamp-1,
+        .mobile-clamp-2 {
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .mobile-clamp-1 { -webkit-line-clamp: 1; }
+        .mobile-clamp-2 { -webkit-line-clamp: 2; }
+
+        /* Onderdelen die alleen in de brede weergave betekenis hebben. */
+        .mobile-hidden { display: none !important; }
+
+        /* Aangetikte keuze (bv. de gekozen dag in de maandweergave). Alleen
+           zichtbaar op de telefoon, waar zo'n keuze ook echt bestaat. */
+        .mobile-selected {
+            box-shadow: inset 0 0 0 2px var(--color-primary-500);
+        }
+
+        /* Knoppen die op het bureaublad pas bij hover verschijnen. Een vinger
+           kan niet zweven, dus op de telefoon staan ze gewoon in beeld. */
+        .mobile-visible {
+            display: inline-flex !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+        }
+    }
+
+    /* Horizontaal veegbare rij (weergaveknoppen, filterchips) zonder balk. */
+    .swipe-x {
+        @apply flex overflow-x-auto;
+        scrollbar-width: none;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .swipe-x::-webkit-scrollbar {
+        display: none;
+    }
+
+    /* Ruimte voor de thuisbalk van de iPhone. */
+    .safe-bottom {
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    /* Safari zoomt in op een veld dat kleiner dan 16px tekst heeft. Op de
+       telefoon dus 16px; vanaf lg weer de compacte 14px van het ontwerp. */
+    @media (max-width: 1023px) {
+        .input,
+        .dropdown-trigger,
+        .dropdown-search,
+        .editor-surface,
+        select,
+        textarea {
+            font-size: 16px;
+        }
+    }
+
+    /* ---- Handleiding ----------------------------------------------------
+       Gerenderde markdown uit docs/handleiding: commonmark levert klasseloze
+       HTML, dus de opmaak moet via de elementen zelf. */
+    .manual {
+        @apply max-w-3xl text-sm leading-6 text-slate-700;
+    }
+
+    .manual h2 {
+        @apply mb-3 mt-8 border-b border-slate-100 pb-2 text-base font-semibold text-slate-900 first:mt-0;
+    }
+
+    .manual h3 {
+        @apply mb-2 mt-6 text-sm font-semibold text-slate-900;
+    }
+
+    .manual p {
+        @apply my-3;
+    }
+
+    .manual ul {
+        @apply my-3 list-disc space-y-1.5 pl-5;
+    }
+
+    .manual ol {
+        @apply my-3 list-decimal space-y-1.5 pl-5;
+    }
+
+    .manual a {
+        @apply font-medium text-primary hover:text-primary-700;
+    }
+
+    .manual strong {
+        @apply font-semibold text-slate-900;
+    }
+
+    .manual table {
+        @apply my-4 w-full text-left;
+    }
+
+    .manual th {
+        @apply border-b border-slate-200 py-2 pr-4 text-xs font-semibold uppercase tracking-wide text-slate-500;
+    }
+
+    .manual td {
+        @apply border-b border-slate-100 py-2 pr-4 align-top;
+    }
+
+    .manual code {
+        @apply rounded bg-slate-100 px-1 py-0.5 text-[0.8125em] text-slate-800;
+    }
+
+    .manual blockquote {
+        @apply my-3 border-l-2 border-slate-200 pl-4 text-slate-500;
+    }
+}
