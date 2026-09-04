@@ -25,7 +25,7 @@ GitHub-token nodig met leesrecht op deze repo:
 - werkplek: `composer config --global --auth github-oauth.github.com <token>`
 - webserver: hetzelfde commando als de deploy-gebruiker (schrijft
   `~/.composer/auth.json`)
-- GitHub Actions: repo-secret `SWAPPED_UI_TOKEN`, gelezen via `COMPOSER_AUTH`
+- GitHub Actions: repo-secret `SWAPPED_PACKAGES_TOKEN`, gelezen via `COMPOSER_AUTH`
   op de `composer install`-stap
 
 ## Wijziging uitrollen
